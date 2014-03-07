@@ -28,12 +28,13 @@ class matrixmultiplier {
 		SIZE = Integer.parseInt(args[2]);
 
 		Matrix m1 = new Matrix(SIZE);
+		//m1.printMatrix();
 
 		Matrix m2 = new Matrix(SIZE);
 
 		Matrix testResult = multiplyMatrices(m1,m2);
-//		testResult.printMatrix();
-//		System.out.println();
+		testResult.printMatrix();
+		System.out.println();
 		
 		Matrix test3Result = multiplyMatrices(m1,testResult);
 		test3Result.printMatrix();
@@ -48,23 +49,35 @@ class matrixmultiplier {
 		Matrix right = new Matrix(SIZE);
 
 		for(int i = 0; i < NUM_MATRICES-1; i ++){
+			System.out.println("Setting up matrices "+i+" and "+(i+1));
+			//System.out.println("Left at start ");
+			//left.printMatrix();
+			//System.out.println("Right at start");
+			//right.printMatrix();
+			
 
 			if(METHOD.equals("U")){
 				result = useUnthreaded(left,right);
 			}
 			else if(METHOD.equals("R")){
-				result = useRowThreads(SIZE,left,right,result);
+				result = useRowThreads(SIZE,left,right);
 			}
 			else if(METHOD.equals("E")){
-				result = useElementThreads(SIZE, left,right, result);
+				result = useElementThreads(SIZE, left,right);
 			}
 			else{
 				System.err.println("Unknown method, defaulting to unthreaded");
 				result = useUnthreaded(left, right);
 			}
+			System.out.println("Left at end ");
+			left.printMatrix();
 			left = result;
+			System.out.println("Result at end ");
+			left.printMatrix();
+			System.out.println("");
 		}
 		result.printMatrix();
+		
 		
 	}
 
@@ -72,9 +85,10 @@ class matrixmultiplier {
 		return multiplyMatrices(m1,m2);	
 	}
 
-	private static Matrix useRowThreads(int numRows, Matrix m1, Matrix m2, Matrix result){
+	private static Matrix useRowThreads(int numRows, Matrix m1, Matrix m2){
 
 		Thread[] threads = new Thread[numRows]; //Set up an array for our threads
+		Matrix result = new Matrix(numRows);
 
 		for(int i = 0; i < threads.length; i++){ //For each thread,
 			threads[i] = new RowThread(m1.matrix[i], m2.getMatrix(), i, result);
@@ -91,10 +105,11 @@ class matrixmultiplier {
 
 	}
 
-	private static Matrix useElementThreads(int numRows, Matrix m1, Matrix m2, Matrix result){
+	private static Matrix useElementThreads(int numRows, Matrix m1, Matrix m2){
 		int numElements = numRows*numRows;
 		Matrix left = new Matrix(m1.matrix, numRows);
 		Matrix right = new Matrix(m2.matrix, numRows);
+		Matrix result = new Matrix(numRows);
 
 		Thread[] threads = new Thread[numElements]; //Set up an array for our threads
 
@@ -102,6 +117,7 @@ class matrixmultiplier {
 
 			int whichRow = (int) Math.floor(i/numRows);
 			int whichCol = i%numRows;
+			//System.out.println("Setting up thread for element "+i+" at "+whichRow+", "+whichCol);
 
 			threads[i] = new ElementThread(left.matrix[whichRow], right.getCol(whichCol), whichRow, whichCol, result);
 			threads[i].start();
@@ -165,13 +181,25 @@ class matrixmultiplier {
 		return result;
 	}
 
-	public static double multiplyElement(double[] row, double[] col){
+	public static double multiplyElement(int whichR, int whichC, double[] row, double[] col){
+		
 
 		double result = 0;
 
 		if(row.length != col.length){
 			System.err.println("Incompatible size");
 			System.exit(-1);
+		}
+		
+		//System.out.println("Multiplying row "+whichR);
+		for(int i = 0; i < row.length; i++){
+			//System.out.print(row[i]+" ");
+		}
+		//System.out.println();
+		//System.out.println("By Column "+whichC);
+		for(int i = 0; i < col.length; i++){
+			//System.out.println(col[i]);
+			//System.out.println();
 		}
 
 		int size = row.length;
@@ -180,6 +208,11 @@ class matrixmultiplier {
 			result += (row[i] * col[i]);
 		}
 
+		//System.out.println("Result for "+whichR+", "+whichC);
+		for(int i = 0; i < 1; i++){
+			//System.out.print(result);
+		}
+		//System.out.println();
 		return result;
 	}
 }
@@ -223,7 +256,7 @@ class ElementThread extends Thread{ //Used this for help with Threads http://doc
 
 	public void run(){ //On run, simply execute a command as usual, but now wrapped in a thread
 		synchronized(this.result){
-			double newValue = matrixmultiplier.multiplyElement(this.left, this.right);
+			double newValue = matrixmultiplier.multiplyElement(whichRow, whichCol, this.left, this.right);
 			result.setElement(this.whichRow, this.whichCol, newValue);
 		}
 	}
