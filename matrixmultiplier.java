@@ -33,8 +33,8 @@ class matrixmultiplier {
 		Matrix m2 = new Matrix(SIZE);
 
 		Matrix testResult = multiplyMatrices(m1,m2);
-		testResult.printMatrix();
-		System.out.println();
+		//testResult.printMatrix();
+		//System.out.println();
 		
 		Matrix test3Result = multiplyMatrices(m1,testResult);
 		test3Result.printMatrix();
@@ -47,9 +47,10 @@ class matrixmultiplier {
 		Matrix result = new Matrix(SIZE);
 		Matrix left = new Matrix(SIZE);
 		Matrix right = new Matrix(SIZE);
-
+		
+		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < NUM_MATRICES-1; i ++){
-			System.out.println("Setting up matrices "+i+" and "+(i+1));
+			//System.out.println("Setting up matrices "+i+" and "+(i+1));
 			//System.out.println("Left at start ");
 			//left.printMatrix();
 			//System.out.println("Right at start");
@@ -69,13 +70,15 @@ class matrixmultiplier {
 				System.err.println("Unknown method, defaulting to unthreaded");
 				result = useUnthreaded(left, right);
 			}
-			System.out.println("Left at end ");
-			left.printMatrix();
+			//System.out.println("Left at end ");
+			//left.printMatrix();
 			left = result;
-			System.out.println("Result at end ");
-			left.printMatrix();
-			System.out.println("");
+			//System.out.println("Result at end ");
+			//left.printMatrix();
+			//System.out.println("");
 		}
+		long runTime = System.currentTimeMillis() - startTime;
+		System.out.println("Multiplication took: "+runTime+" milliseconds");
 		result.printMatrix();
 		
 		
